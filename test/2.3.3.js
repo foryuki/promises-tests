@@ -4,7 +4,7 @@ var assert = require("assert");
 var thenables = require("./helpers/thenables");
 var reasons = require("./helpers/reasons");
 
-var adapter = global.adapter;
+var adapter = require('../adapter');
 var resolved = adapter.resolved;
 var rejected = adapter.rejected;
 var deferred = adapter.deferred;

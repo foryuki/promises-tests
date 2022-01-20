@@ -3,7 +3,7 @@
 var assert = require("assert");
 var testFulfilled = require("./helpers/testThreeCases").testFulfilled;
 
-var adapter = global.adapter;
+var adapter = require('../adapter');
 var resolved = adapter.resolved;
 var deferred = adapter.deferred;
 
