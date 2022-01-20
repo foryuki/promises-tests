@@ -13,22 +13,22 @@ const REJECT = 'REJECT'
  *    - resolve，它接收一个参数 value，代表异步操作返回的结果，当异步操作执行成功后，会调用 resolve 方法
  *    - reject，它接收一个参数 reason，代表异步操作返回的结果，当异步操作失败后，会调用 reject 方法
  * 6. 如果 new Promise 的时候报错，会变成失败态
- * 
+ *
  * 版本2： 处理异步情况
- * 
+ *
  * 版本3：实现 then 的链式调用
  *  如果一个 promise 的 then 方法中的函数（成功或失败）返回的结果是一个 promise 的话，
  * 会自动将这个 promise 执行，并且采用它的状态。
  *  如果成功，会将成功的结果向外层的下一个 then 传递。
- * 
+ *
  * then 的特点：
  * 1. 只有两种情况会失败：1）返回一个失败的 promise  2）抛出异常
  * 2. 每次执行 promise 时，都会返回一个新的 promise 实例
- * 
+ *
  */
 
 /**
- * 
+ *
  */
 function resolvePromise(promise2, x, resolve, reject) {
   if (promise2 === x) {
@@ -36,9 +36,9 @@ function resolvePromise(promise2, x, resolve, reject) {
   }
 
   if (typeof x === 'object' && x !== null || typeof x === 'function') {
+    let called = false; // 防止别人的 promise 既调用了成功，又调用了失败
     try {
       let then = x.then // 取 then 有可能报错，可能 then 属性是通过 defineProperty 来定义的
-      let called = false; // 防止别人的 promise 既调用了成功，又调用了失败
       if (typeof then === 'function') { // 当前有 then 方法，姑且认为它是一个 Promise
         // 也可以直接用 x.then，但是防止 x.then 时又报错
         then.call(x, y => { // y 可能还是一个 promise, 直到解析出来的结果是一个普通值
@@ -56,7 +56,9 @@ function resolvePromise(promise2, x, resolve, reject) {
       }
     } catch (e) {
       // promise 失败了，有可能还能调用成功
-      if (called) return;
+      if (called) {
+        return
+      };
       called = true;
       reject(e)
     }
@@ -160,6 +162,12 @@ class Promise {
     })
     return p2;
   }
+
+  // static resolve(value) {
+  //   return new Promise((resolve, reject) => {
+  //     resolve(value)
+  //   })
+  // }
 }
 
 Promise.deferred = function () {
@@ -171,7 +179,16 @@ Promise.deferred = function () {
   return dfd;
 }
 
-Promise.resolved = Function.prototype;
-Promise.rejected = Function.prototype;
+Promise.resolved = function (value) {
+  return new Promise((resolve, reject) => {
+    resolve(value)
+  })
+};
+
+Promise.rejected = function (reason) {
+  return new Promise((resolve, reject) => {
+    reject(reason)
+  })
+};
 
 module.exports = Promise
